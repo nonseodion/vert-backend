@@ -28,6 +28,8 @@
     "express": "^4.18.2",
     "helmet": "^7.0.0",
     "morgan": "^1.10.0",
-    "validator": "^13.9.0"
+    "socket.io": "^4.7.1",
+    "validator": "^13.9.0",
+    "viem": "^1.2.6"
   }
 }
