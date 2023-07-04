@@ -3,7 +3,8 @@ import banks from "../data/banks.json";
 import verifySwapTx from "../services/blockchain/verifySwapTx";
 import { Hash } from "viem";
 import { getClient } from "../services/blockchain/config.blockchain";
-import getTxConfirmations from "../services/blockchain/getTxConfirmations";
+import monitorTx from "../services/blockchain/monitorTx";
+import { TransactionEvents } from "./events";
 
 type BankAccount = {
   number: number;
@@ -11,38 +12,28 @@ type BankAccount = {
   bank:  typeof banks[number]["id"]
 }
 
-// minimum no. of confirmations needed to confirm swap
-const minConfirmations = 15;
-
 function _txNameSpace(io: Server){
   const txNameSpace = io.of("/transactions");
 
   txNameSpace.on("connection", (socket) => {
-    socket.on("swap", async (txHash: Hash, sender: Hash, bankAccount: BankAccount) => {
-      const BUSDAmountSent = await verifySwapTx(txHash, sender);
-      if (BUSDAmountSent > 0) {
-        socket.emit("swapValidity", true);
-      }else {
-        socket.emit("swapValidity", false)
+    // set when a swap is comlete on the frontend
+    socket.on(TransactionEvents.SWAP, async (txHash: Hash, sender: Hash, bankAccount: BankAccount) => {
+      try{
+        const BUSDAmountSent = await verifySwapTx(txHash, sender);
+        if (BUSDAmountSent > 0) {
+          socket.emit(TransactionEvents.SWAP_VALIDITY, true);
+        }else {
+          socket.emit(TransactionEvents.SWAP_VALIDITY, false)
+        }
+      }catch(err){
+        console.log(err.message);
+        socket.emit(TransactionEvents.SWAP_VALIDITY, false);
+        return;
       }
 
-      // check confirmations and send fiat when confirmations are complete
       const blockchainClient = getClient("localhost");
-
-      // weird usage of watching blocks
-      const unWatchBlocks = blockchainClient.watchBlockNumber({
-        onBlockNumber: async (blockNumber) => {
-          const confirmtions = await getTxConfirmations(txHash, blockNumber);
-          socket.emit("txConfirmations", confirmtions);
-
-          if(confirmtions > minConfirmations){
-            unWatchBlocks();
-            //TODO: send fiat to bank account
-
-          }
-        }
-      });
-
+      // monitor confirmations and send fiat when confirmations are complete
+      monitorTx(blockchainClient, socket, txHash);
     })
   })
 }
