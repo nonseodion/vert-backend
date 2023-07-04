@@ -1,22 +1,16 @@
-import { Address, TransactionReceipt, Hash, createPublicClient, decodeEventLog, http, getAddress } from "viem";
-import { bscTestnet, localhost } from "viem/chains";
-import { ExtractAbiEvent, AbiParametersToPrimitiveTypes } from 'abitype';
+import { Address, TransactionReceipt, Hash, decodeEventLog, getAddress } from "viem";
 
-import receivers from "../data/receivers.json";
-import routers from "../data/routers.json";
-import routerAbi from "../data/abis/router";
-
-type Topics = [] | [signature: `0x${string}`, ...args: `0x${string}`[]]
+import receivers from "../../data/receivers.json";
+import routers from "../../data/routers.json";
+import routerAbi from "../../data/abis/router";
+import { getClient } from "./config.blockchain";
 
 const SellEventSignature = "0xa90e25af8f532db6a04ac99d7101fca78edb7b6c9507535d6e86146407204dcc";
-const blockchainClient = createPublicClient({
-  chain: localhost,
-  transport: http()
-});
 
-// checks the validity of the blockchain tx and returns the amount of stable coin sold
-async function checkBlockchainTx(txHash: Hash, senderAddress: Address){
+// checks the validity of the swap blockchain tx and returns the amount of stable coin sold
+async function checkSwapTxValidity(txHash: Hash, senderAddress: Address){
   senderAddress = getAddress(senderAddress);
+  const blockchainClient = getClient("localhost");
   const txReceipt: TransactionReceipt = await blockchainClient.getTransactionReceipt({ hash: txHash});
   const {logs: _logs, from, to } = txReceipt;
 
@@ -41,7 +35,8 @@ async function checkBlockchainTx(txHash: Hash, senderAddress: Address){
       topics: log.topics, // tslint:disable-line
       eventName: "Sell"
     }).args;
-    sellEvent = {seller: getAddress(sellEventLog.seller), amountStableCoin: sellEvent.amountStableCoin, receiver: getAddress(sellEvent.receiver)}
+
+    sellEvent = {seller: getAddress(sellEventLog.seller), amountStableCoin: sellEventLog.amountStableCoin, receiver: getAddress(sellEventLog.receiver)}
     break;
   }
 
@@ -49,6 +44,7 @@ async function checkBlockchainTx(txHash: Hash, senderAddress: Address){
     console.log(`checkBlockchainTx_Failure: Sell event missing in ${txHash} `)
     throw Error("Failed to verify Blockchain Tx ");
   }
+
   if(sellEvent.seller !== senderAddress){
     console.log(`checkBlockchainTx_Failure: Different Sell Log seller. SellEventSeller:${sellEvent.seller}. Sender:${senderAddress}`)
     throw Error("Failed to verify Blockchain Tx ");
@@ -61,4 +57,4 @@ async function checkBlockchainTx(txHash: Hash, senderAddress: Address){
   return sellEvent.amountStableCoin;
 }
 
-export default checkBlockchainTx;
+export default checkSwapTxValidity;
