@@ -1,4 +1,4 @@
-import { createPublicClient, http, Client } from "viem";
+import { createPublicClient, http } from "viem";
 import { localhost, bsc, bscTestnet } from "viem/chains";
 
 

@@ -9,10 +9,10 @@ async function getTxConfirmations(txHash: Hash, latestBlockNumber: bigint): Prom
       hash: txHash
     })
   )?.blockNumber as bigint;
-  
+
   if(!txBlockNumber){
     console.log(`getTxConfirmations_Failed: ${txHash} has been reorged`)
-    throw Error("Failed to get confirmations");
+    throw Error("Failed to get transaction confirmations");
   }
 
   const confirmations = Number(latestBlockNumber - txBlockNumber) + 1;

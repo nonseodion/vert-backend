@@ -17,7 +17,8 @@ function _txNameSpace(io: Server){
 
   txNameSpace.on("connection", (socket) => {
     // set when a swap is comlete on the frontend
-    socket.on(TransactionEvents.SWAP, async (txHash: Hash, sender: Hash, bankAccount: BankAccount) => {
+    socket.on(TransactionEvents.SWAP, async (txHash: Hash, sender: Hash, bankAccount: BankAccount, rates: any) => {
+
       try{
         const BUSDAmountSent = await verifySwapTx(txHash, sender);
         if (BUSDAmountSent > 0) {
@@ -32,8 +33,9 @@ function _txNameSpace(io: Server){
       }
 
       const blockchainClient = getClient("localhost");
+      
       // monitor confirmations and send fiat when confirmations are complete
-      monitorTx(blockchainClient, socket, txHash);
+      monitorTx(blockchainClient, socket, txHash, 0, rates);
     })
   })
 }
