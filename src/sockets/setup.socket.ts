@@ -1,14 +1,14 @@
 import {Server as HttpServer} from "http";
 import { Server } from "socket.io";
-import txNameSpace from "./transaction.socket";
-import rateNameSpace from "./rate.socket";
+import txSocket from "./transaction.socket";
+import rateSocket from "./rate.socket";
 
 function setupSocket(httpServer: HttpServer){
   const io = new Server(httpServer);
   
   // setup name spaces
-  txNameSpace(io);
-  rateNameSpace(io);
+  txSocket(io);
+  rateSocket(io);
 }
 
 export default setupSocket;

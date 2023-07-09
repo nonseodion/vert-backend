@@ -1,31 +1,32 @@
 import { Server } from "socket.io";
-import crypto from "node:crypto";
+import getRates from "../services/getRates";
 
-function _rateNameSpace(io: Server){
-  const rateNameSpace = io.of("/rates")
 
-  rateNameSpace.on("connection", (socket) => {
+function _rateSocket(io: Server){
+  const rateSocket = io.of("/rates")
+
+  let rateIntervalSet = false;
+  let latestRatesData;
+
+  rateSocket.on("connection", async (socket) => {
     socket.join("rates");
-    setInterval(() => {
-      // get rates
-      const rates = {
-        USD_BUSD: "",
-        USD_NGN: ""
-      }
-      
-      // sign rates with a timestamp to ensure the client sends back correct rates
-      // within a specific time
-      const data = {
-        rates, time: new Date().getTime()
-      }
+    
+    if(rateIntervalSet) {
+      socket.emit("rates", latestRatesData || await getRates())
+      return;
+    }else{
+      rateIntervalSet = true;
+      latestRatesData = await getRates();
+      socket.emit("rates", latestRatesData)
+    }
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const signature = crypto.sign("SHA256", JSON.stringify(data), process.env.PRIVATE_KEY)
-        .toString("hex");
-      socket.to("rates").emit("rates", {data, signature})
-    }, 300);
+    setInterval(async () => {
+      latestRatesData = await getRates();
+      rateSocket.to("rates").emit("rates", latestRatesData)
+    }, 60000);
+
+    
   });
 }
 
-export default _rateNameSpace;
+export default _rateSocket;

@@ -12,10 +12,10 @@ type BankAccount = {
   bank:  typeof banks[number]["id"]
 }
 
-function _txNameSpace(io: Server){
-  const txNameSpace = io.of("/transactions");
+function _txSocket(io: Server){
+  const txSocket = io.of("/transactions");
 
-  txNameSpace.on("connection", (socket) => {
+  txSocket.on("connection", (socket) => {
     // set when a swap is comlete on the frontend
     socket.on(TransactionEvents.SWAP, async (txHash: Hash, sender: Hash, bankAccount: BankAccount, rates: any) => {
 
@@ -40,4 +40,4 @@ function _txNameSpace(io: Server){
   })
 }
 
-export default _txNameSpace;
+export default _txSocket;
