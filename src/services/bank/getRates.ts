@@ -1,14 +1,23 @@
 import crypto from "node:crypto";
-import api from "api";
-const coinprofileSDK = api("@coinprofile/v1.0#4vskx17nldeochjl")
+import { coinprofileSDKNoAuth } from "./setup.bank";
 
+export type Rates = {
+  data: {
+    rates: {
+      BUSDNGN: number,
+      BUSDUSD: number
+    },
+    time: number
+  },
+  signature: string
+}
 
 async function getRates(){
   let rates: {[key:string]: {rate: number, key: number}};
-  
+
   try{
     const data = (
-      await coinprofileSDK.getCurrentRates()
+      await coinprofileSDKNoAuth.getCurrentRates()
     ).data.data;
 
     rates = {
@@ -17,6 +26,7 @@ async function getRates(){
     };
   }catch(err){
     console.log(`rateFetch_Failed: ${err.message}`);
+    throw Error(err);
   }
     
   // sign rates with a timestamp to ensure the client sends back correct rates

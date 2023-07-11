@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import validator from "validator";
 
 import banksModel from "../../model/banks.model"
-import { getAccountName as _getAccountName } from "../../services/getAccountName";
+import { getAccountName as _getAccountName } from "../../services/bank/getAccountName";
 
 function getBanks(_, res: Response){
   return res.status(200).json(banksModel.getAllBanks());
