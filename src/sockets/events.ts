@@ -5,6 +5,6 @@ export enum TransactionEvents {
   TX_CONFIRMATIONS_STATUS = "txConfirmationsStatus"
 }
 
-enum RateEvents {
-  
+export enum RateEvents {
+  RATES = "rates"
 }

@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
-import getRates from "../services/getRates";
+import getRates from "../services/bank/getRates";
+import { RateEvents } from "./events";
 
 
 function _rateSocket(io: Server){
@@ -12,7 +13,7 @@ function _rateSocket(io: Server){
     socket.join("rates");
     
     if(rateIntervalSet) {
-      socket.emit("rates", latestRatesData || await getRates())
+      socket.emit(RateEvents.RATES, latestRatesData || await getRates())
       return;
     }else{
       rateIntervalSet = true;
