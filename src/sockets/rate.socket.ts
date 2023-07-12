@@ -12,21 +12,23 @@ function _rateSocket(io: Server){
   rateSocket.on("connection", async (socket) => {
     socket.join("rates");
     
-    if(rateIntervalSet) {
-      socket.emit(RateEvents.RATES, latestRatesData || await getRates())
-      return;
-    }else{
-      rateIntervalSet = true;
-      latestRatesData = await getRates();
-      socket.emit("rates", latestRatesData)
+    try{
+      if(rateIntervalSet) {
+        socket.emit(RateEvents.RATES, latestRatesData || await getRates())
+        return;
+      }else{
+        rateIntervalSet = true;
+        latestRatesData = await getRates();
+        socket.emit("rates", latestRatesData)
+      }
+
+      setInterval(async () => {
+        latestRatesData = await getRates();
+        rateSocket.to("rates").emit("rates", latestRatesData)
+      }, 60000);
+    } catch(err){
+      console.log("rateSocket_Failure:", err.message);
     }
-
-    setInterval(async () => {
-      latestRatesData = await getRates();
-      rateSocket.to("rates").emit("rates", latestRatesData)
-    }, 60000);
-
-    
   });
 }
 
