@@ -14,7 +14,7 @@ function _txSocket(io: Server){
   const txSocket = io.of("/transactions");
 
   txSocket.on("connection", (socket) => {
-    // set when a swap is comlete on the frontend
+    // triggered when a swap is comlete on the frontend
     socket.on(TransactionEvents.SWAP, async (
       txHash: Hash, sender: Address, bankCode: string, accountName: string, accountNumber: number, rates: Rates
     ) => {

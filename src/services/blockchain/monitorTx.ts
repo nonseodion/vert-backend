@@ -21,7 +21,7 @@ function monitorTx(blockchainClient: any, socket: Socket, txHash: Hash, retries:
         if(confirmtions >= minConfirmations){
           unWatchBlocks();
           socket.emit(TransactionEvents.TX_CONFIRMATIONS_STATUS, true);
-          //TODO: send fiat to bank account
+          // sends naira to the recipient bank account
           sendNaira();
         }
       }catch(err){

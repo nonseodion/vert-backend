@@ -1,4 +1,4 @@
-import { BankAccount, coinprofileSDKAuth } from "./setup.bank";
+import { BankAccount, coinprofileApi } from "./setup.bank";
 import banks from "../../data/banks.json";
 import { Socket } from "socket.io";
 import getRates, { Rates } from "./getRates";
@@ -19,25 +19,29 @@ async function sendNaira(params: SendNairaParams){
   const rateCorrect = true // verifyRate(rates);
   let rate: number;
   if(rateCorrect){
-    rate = rates.data.rates.BUSDNGN
+    rate = rates.data.rates.BUSDNGN.rate
   }else {
     rate = (await getRates()).data.rates.BUSDNGN.rate;
   }
 
   // divide by 10**18
-  const NGNAmount = toTwoDecimalPlaces(formatUnits(busdAmount * BigInt(rate), 18));
+  // TODO validate amount, amount must be >= 500
+  const NGNAmount = toTwoDecimalPlaces(formatUnits(busdAmount * BigInt(rate*100), 20));
 
-  const data = await coinprofileSDKAuth.withdrawBalance({
-    otpType: 'otp',
-    currency: 'NGN',
-    accountNumber,
-    accountName,
-    bank: bankName,
-    bankCode,
-    amount: NGNAmount
-  });
+  const res = await coinprofileApi.post(
+    "balance/withdraw",
+    {
+      otpType: 'otp',
+      currency: 'NGN',
+      accountNumber,
+      accountName,
+      bank: bankName,
+      bankCode,
+      amount: "500" // NGNAmount
+    }
+  )
 
-  console.log(data);
+  console.log(res.data);
 }
 
 export default sendNaira;
