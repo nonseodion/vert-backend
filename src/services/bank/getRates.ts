@@ -4,16 +4,15 @@ import { coinprofileSDKNoAuth } from "./setup.bank";
 export type Rates = {
   data: {
     rates: {
-      BUSDNGN: number,
-      BUSDUSD: number
-    },
+      BUSDNGN: {rate: number, key: string},
+      BUSDUSD: {rate: number, key: string}
     time: number
-  },
+  }},
   signature: string
 }
 
 async function getRates(){
-  let rates: {[key:string]: {rate: number, key: number}};
+  let rates: {[key:string]: {rate: number, key: string}};
 
   try{
     const data = (
