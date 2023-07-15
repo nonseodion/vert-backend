@@ -1,19 +1,22 @@
-import { BankAccount, coinprofileApi } from "./setup.bank";
+import { BankAccount, EXCHANGETXSTATUS, coinprofileApi } from "./setup.bank";
 import banks from "../../data/banks.json";
 import { Socket } from "socket.io";
 import getRates, { Rates } from "./getRates";
 import { formatUnits } from "viem";
 import toTwoDecimalPlaces from "../../utils/toTwoDecimalPlaces";
+import getTxStatus from "./getTxStatus";
+import { TransactionEvents } from "../../sockets/events";
 
 type SendNairaParams = {
   bankAccount: BankAccount
   rates: Rates,
   busdAmount: bigint,
-  socket: Socket
+  socket: Socket,
+  swapTime: number
 }
 
 async function sendNaira(params: SendNairaParams){
-  const { bankAccount, rates, socket, busdAmount } = params;
+  const { bankAccount, rates, socket, busdAmount, swapTime } = params;
   const {bankCode, name: accountName, number: accountNumber} = bankAccount;
   const bankName = banks.find((bank) => bank.code === bankCode).name;
   const rateCorrect = true // verifyRate(rates);
@@ -24,24 +27,66 @@ async function sendNaira(params: SendNairaParams){
     rate = (await getRates()).data.rates.BUSDNGN.rate;
   }
 
-  // divide by 10**18
-  // TODO validate amount, amount must be >= 500
+
   const NGNAmount = toTwoDecimalPlaces(formatUnits(busdAmount * BigInt(rate*100), 20));
 
-  const res = await coinprofileApi.post(
-    "balance/withdraw",
-    {
-      otpType: 'otp',
-      currency: 'NGN',
-      accountNumber,
-      accountName,
-      bank: bankName,
-      bankCode,
-      amount: "500" // NGNAmount
-    }
-  )
+  // divide by 10**18
+  // TODO validate amount, amount must be >= 500
+  try{
+    const result = (await coinprofileApi.post(
+      "balance/withdraw",
+      {
+        otpType: 'otp',
+        currency: 'NGN',
+        accountNumber,
+        accountName,
+        bank: bankName,
+        bankCode,
+        amount: "500" // NGNAmount
+      }
+    )).data;
+    
+    
+    let active = false; // used to throttle fetch tx status
+    const maxRetries = 3;
+    let retries = 0;
 
-  console.log(res.data);
+    const interval = setInterval(async () => {
+      if(active === true) return;
+        active = true;
+        retries += 1;
+
+        let status: EXCHANGETXSTATUS;
+        try{
+          status = await getTxStatus(
+            result.data.withdrawal.transactionId, 
+            swapTime
+          );
+        }catch(err){
+
+          console.log("sendNaira_Failed_getTxStatusError:", err.message)
+        }
+        
+        if(status === EXCHANGETXSTATUS.FULLFILED || status === EXCHANGETXSTATUS.FAILED){
+          clearInterval(interval);
+          socket.emit(TransactionEvents.EXCHANGE_STATUS, status);
+          active = false;
+          return;
+        } 
+
+        if(retries === maxRetries){
+          clearInterval(interval);
+          socket.emit(TransactionEvents.EXCHANGE_STATUS, EXCHANGETXSTATUS.FAILED)
+        }
+        active = false;
+      }, 
+      2500
+    );
+
+  }catch(err){
+    socket.emit(TransactionEvents.EXCHANGE_STATUS, EXCHANGETXSTATUS.FAILED);
+    console.log("sendNaira_Failed:", err.message);
+  }
 }
 
 export default sendNaira;

@@ -8,12 +8,12 @@ import { getClient } from "./config.blockchain";
 const SellEventSignature = "0xa90e25af8f532db6a04ac99d7101fca78edb7b6c9507535d6e86146407204dcc";
 
 // checks the validity of the swap blockchain tx and returns the amount of stable coin sold
-async function verifySwapTx(txHash: Hash, senderAddress: Address){
+async function verifySwapTx(txHash: Hash, senderAddress: Address): Promise<{busdAmount: bigint, swapTime: number}>{
   senderAddress = getAddress(senderAddress);
   const blockchainClient = getClient("localhost");
-  const txReceipt: TransactionReceipt = await blockchainClient.getTransactionReceipt({ hash: txHash});
-  const {logs: _logs, from, to } = txReceipt;
-
+  const txReceipt: TransactionReceipt = await blockchainClient.getTransactionReceipt({ hash: txHash });
+  const {logs: _logs, from, to, blockNumber } = txReceipt;
+  const swapTime = Number((await blockchainClient.getBlock({blockNumber: blockNumber})).timestamp);
   const logs  = _logs as unknown as (typeof _logs[0] & {topics: [] | [signtaure: `0x${string}`, ...args: `0x${string}`[]]}) [];
 
   if(senderAddress !== getAddress(from)){
@@ -54,7 +54,7 @@ async function verifySwapTx(txHash: Hash, senderAddress: Address){
     throw Error("Failed to verify Swap Tx ");
   }
   
-  return sellEvent.amountStableCoin;
+  return { busdAmount: sellEvent.amountStableCoin, swapTime };
 }
 
 export default verifySwapTx;

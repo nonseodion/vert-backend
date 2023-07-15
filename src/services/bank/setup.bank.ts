@@ -24,3 +24,8 @@ export type BankAccount = {
   name: string;
   bankCode:  typeof banks[number]["code"]
 }
+
+export enum EXCHANGETXSTATUS {
+  FULLFILED = "fullfiled",
+  FAILED = "failed",
+}

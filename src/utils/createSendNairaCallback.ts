@@ -8,13 +8,13 @@ type createSendNairaCallbackParams = {
   accountName: string,
   rates: Rates,
   busdAmount: bigint,
-
+  swapTime: number,
   socket: Socket
 }
 
 // simply takes inputs and passes them to sendNaira
 function createSendNairaCallback( params: createSendNairaCallbackParams ) {
-  const {bankCode, accountName, accountNumber, rates, socket, busdAmount} = params
+  const {bankCode, accountName, accountNumber, swapTime, rates, socket, busdAmount} = params
 
   return () => {
     sendNaira({
@@ -25,7 +25,8 @@ function createSendNairaCallback( params: createSendNairaCallbackParams ) {
       },
       busdAmount,
       rates,
-      socket
+      socket,
+      swapTime
     });
   }  
 }

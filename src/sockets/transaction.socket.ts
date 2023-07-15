@@ -19,9 +19,11 @@ function _txSocket(io: Server){
       txHash: Hash, sender: Address, bankCode: string, accountName: string, accountNumber: number, rates: Rates
     ) => {
       
-      let BUSDAmountSent: bigint
+      let BUSDAmountSent: bigint, swapTime: number;
       try{
-        BUSDAmountSent = await verifySwapTx(txHash, sender);
+        const {busdAmount, swapTime: _swapTime} = await verifySwapTx(txHash, sender);
+        BUSDAmountSent = busdAmount;
+        swapTime = _swapTime;
         if (BUSDAmountSent > 0) {
           socket.emit(TransactionEvents.SWAP_VALIDITY, true);
         }else {
@@ -41,7 +43,8 @@ function _txSocket(io: Server){
         accountNumber,
         busdAmount: BUSDAmountSent,
         rates,
-        socket
+        socket,
+        swapTime
       })
       // monitor confirmations and send fiat when confirmations are complete
       monitorTx(blockchainClient, socket, txHash, 0, sendNairaCallback);
