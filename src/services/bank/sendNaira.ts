@@ -1,3 +1,5 @@
+import crypto from "node:crypto";
+
 import { BankAccount, EXCHANGETXSTATUS, coinprofileApi } from "./setup.bank";
 import banks from "../../data/banks.json";
 import { Socket } from "socket.io";
@@ -19,7 +21,11 @@ async function sendNaira(params: SendNairaParams){
   const { bankAccount, rates, socket, busdAmount, swapTime } = params;
   const {bankCode, name: accountName, number: accountNumber} = bankAccount;
   const bankName = banks.find((bank) => bank.code === bankCode).name;
-  const rateCorrect = true // verifyRate(rates);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  let rateCorrect = crypto.verify("SHA256", JSON.stringify(rates.data), process.env.PUBLIC_KEY, Buffer.from(rates.signature, "hex"));
+  // timestamp must not exceed an hour
+  rateCorrect = rateCorrect && rates.data.time + 60*60*1000 >= new Date().getTime()
   let rate: number;
   if(rateCorrect){
     rate = rates.data.rates.BUSDNGN.rate
