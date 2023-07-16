@@ -2,6 +2,7 @@ import { Socket } from "socket.io";
 import getTxConfirmations from "./getTxConfirmations";
 import { Hash } from "viem";
 import { TransactionEvents } from "../../sockets/events";
+import { SupportedClient, getClient } from "./config.blockchain";
 
 // minimum no. of confirmations needed to confirm swap
 const minConfirmations = 5;
@@ -10,12 +11,12 @@ const maxRetries = 3;
 // monitors the tx for block reorgs and makes payout when it has enough confirmatiions.
 // uses recursion to handle reorgs. Check the catch block.
 
-function monitorTx(blockchainClient: any, socket: Socket, txHash: Hash, retries: number, sendNaira: () => void){
+function monitorTx(network: SupportedClient, socket: Socket, txHash: Hash, retries: number, sendNaira: () => void){
 
-  const unWatchBlocks = blockchainClient.watchBlockNumber({
+  const unWatchBlocks = getClient(network).watchBlockNumber({
     onBlockNumber: async (blockNumber: bigint) => {
       try{
-        const confirmtions = await getTxConfirmations(txHash, blockNumber);
+        const confirmtions = await getTxConfirmations(network, txHash, blockNumber);
         socket.emit(TransactionEvents.TX_CONFIRMATIONS, confirmtions);
         
         if(confirmtions >= minConfirmations){
@@ -35,7 +36,7 @@ function monitorTx(blockchainClient: any, socket: Socket, txHash: Hash, retries:
           return;
         }
 
-        setTimeout(() => monitorTx(blockchainClient, socket, txHash, ++retries, sendNaira), 10000);
+        setTimeout(() => monitorTx(network, socket, txHash, ++retries, sendNaira), 10000);
       }
     }
   });

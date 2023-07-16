@@ -1,9 +1,9 @@
 import { Hash } from "viem";
-import { getClient } from "./config.blockchain";
+import { SupportedClient, getClient } from "./config.blockchain";
 
 // checks if the tx has not been reorged and returns the number of confirmations
-async function getTxConfirmations(txHash: Hash, latestBlockNumber: bigint): Promise<number>{
-  const blockchainClient = getClient("localhost");
+async function getTxConfirmations(network: SupportedClient, txHash: Hash, latestBlockNumber: bigint): Promise<number>{
+  const blockchainClient = getClient(network);
   const txBlockNumber = (
     await blockchainClient.getTransaction({
       hash: txHash

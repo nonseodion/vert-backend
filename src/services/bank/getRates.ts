@@ -37,7 +37,7 @@ async function getRates(){
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  const signature = crypto.sign("SHA256", JSON.stringify(data), Buffer.from("82323892", "hex"))
+  const signature = crypto.sign("SHA256", JSON.stringify(data), process.env.PRIVATE_KEY)
     .toString("hex");
 
   return {data, signature}

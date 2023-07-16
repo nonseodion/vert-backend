@@ -17,7 +17,11 @@ const bscTestnetClient = createPublicClient({
   transport: http()
 });
 
-type SupportedClient = "bsc" | "bscTestnet" | "localhost";
+export enum SupportedClient {
+  BSC = "bsc",
+  BSC_TESTNET = "bscTestnet",
+  LOCALHOST = "localhost"
+}
 
 const clients = {
   bsc: bscClient, bscTestnet: bscTestnetClient, localhost: localhostClient

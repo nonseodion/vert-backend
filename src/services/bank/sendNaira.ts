@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 
-import { BankAccount, EXCHANGETXSTATUS, coinprofileApi } from "./setup.bank";
+import { BankAccount, EXCHANGETXSTATUS, getExchangeApi } from "./setup.bank";
 import banks from "../../data/banks.json";
 import { Socket } from "socket.io";
 import getRates, { Rates } from "./getRates";
@@ -8,19 +8,23 @@ import { formatUnits } from "viem";
 import toTwoDecimalPlaces from "../../utils/toTwoDecimalPlaces";
 import getTxStatus from "./getTxStatus";
 import { TransactionEvents } from "../../sockets/events";
+import { SupportedClient } from "../blockchain/config.blockchain";
 
 type SendNairaParams = {
   bankAccount: BankAccount
   rates: Rates,
   busdAmount: bigint,
   socket: Socket,
+  network: SupportedClient,
   swapTime: number
 }
 
 async function sendNaira(params: SendNairaParams){
-  const { bankAccount, rates, socket, busdAmount, swapTime } = params;
+  const { bankAccount, rates, socket, busdAmount, swapTime, network } = params;
   const {bankCode, name: accountName, number: accountNumber} = bankAccount;
   const bankName = banks.find((bank) => bank.code === bankCode).name;
+  const exchangeApi = getExchangeApi(network);
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   let rateCorrect = crypto.verify("SHA256", JSON.stringify(rates.data), process.env.PUBLIC_KEY, Buffer.from(rates.signature, "hex"));
@@ -39,7 +43,7 @@ async function sendNaira(params: SendNairaParams){
   // divide by 10**18
   // TODO validate amount, amount must be >= 500
   try{
-    const result = (await coinprofileApi.post(
+    const result = (await exchangeApi.post(
       "balance/withdraw",
       {
         otpType: 'otp',
@@ -66,6 +70,7 @@ async function sendNaira(params: SendNairaParams){
         try{
           status = await getTxStatus(
             result.data.withdrawal.transactionId, 
+            network,
             swapTime
           );
         }catch(err){

@@ -1,4 +1,5 @@
-import { EXCHANGETXSTATUS, coinprofileApi } from "./setup.bank";
+import { SupportedClient } from "../blockchain/config.blockchain";
+import { EXCHANGETXSTATUS, getExchangeApi } from "./setup.bank";
 
 type CoinprofileTx = {
   transactionId: string,
@@ -14,14 +15,15 @@ type CoinprofileTxs = {
 }
 
 
-async function getTxStatus(txId: string, swapTime: number): Promise<EXCHANGETXSTATUS>{
+async function getTxStatus(txId: string, network: SupportedClient, swapTime: number): Promise<EXCHANGETXSTATUS>{
   let pages = 1;
   let tx: CoinprofileTx;
+  const exchangeApi = getExchangeApi(network);
 
   for(let i = 0; i < pages; i++){
     let coinprofileTxs: CoinprofileTxs;
     try{
-      coinprofileTxs = (await coinprofileApi.get("transaction", {
+      coinprofileTxs = (await exchangeApi.get("transaction", {
         params: {
           currency: 'NGN',
           page: i + 1,

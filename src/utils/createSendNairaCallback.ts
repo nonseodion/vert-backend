@@ -1,6 +1,7 @@
 import { Socket } from "socket.io";
 import sendNaira from "../services/bank/sendNaira"
 import { Rates } from "../services/bank/getRates";
+import { SupportedClient } from "../services/blockchain/config.blockchain";
 
 type createSendNairaCallbackParams = {
   bankCode: string,
@@ -9,12 +10,13 @@ type createSendNairaCallbackParams = {
   rates: Rates,
   busdAmount: bigint,
   swapTime: number,
+  network: SupportedClient,
   socket: Socket
 }
 
 // simply takes inputs and passes them to sendNaira
 function createSendNairaCallback( params: createSendNairaCallbackParams ) {
-  const {bankCode, accountName, accountNumber, swapTime, rates, socket, busdAmount} = params
+  const {bankCode, accountName, accountNumber, network, swapTime, rates, socket, busdAmount} = params
 
   return () => {
     sendNaira({
@@ -26,6 +28,7 @@ function createSendNairaCallback( params: createSendNairaCallbackParams ) {
       busdAmount,
       rates,
       socket,
+      network,
       swapTime
     });
   }  
