@@ -20,7 +20,7 @@ export {
 }
 
 export type BankAccount = {
-  number: number;
+  number: string;
   name: string;
   bankCode:  typeof banks[number]["code"]
 }

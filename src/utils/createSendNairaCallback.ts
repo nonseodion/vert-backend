@@ -4,7 +4,7 @@ import { Rates } from "../services/bank/getRates";
 
 type createSendNairaCallbackParams = {
   bankCode: string,
-  accountNumber: number,
+  accountNumber: string,
   accountName: string,
   rates: Rates,
   busdAmount: bigint,

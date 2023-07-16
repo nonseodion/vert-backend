@@ -7,6 +7,7 @@ import monitorTx from "../services/blockchain/monitorTx";
 import { TransactionEvents } from "./events";
 import { Rates } from "../services/bank/getRates";
 import createSendNairaCallback from "../utils/createSendNairaCallback";
+import validateTxSocketArgs from "../utils/validateTxSocketArgs";
 
 
 
@@ -16,9 +17,15 @@ function _txSocket(io: Server){
   txSocket.on("connection", (socket) => {
     // triggered when a swap is comlete on the frontend
     socket.on(TransactionEvents.SWAP, async (
-      txHash: Hash, sender: Address, bankCode: string, accountName: string, accountNumber: number, rates: Rates
+      txHash: Hash, sender: Address, bankCode: string, accountName: string, accountNumber: string, rates: Rates
     ) => {
-      
+      const {error, valid} = validateTxSocketArgs(txHash, sender, bankCode, accountName, accountNumber);
+      console.log(error, valid);
+      if(!valid){
+        socket.emit(TransactionEvents.ARG_VALIDITY, error);
+        return;
+      }
+
       let BUSDAmountSent: bigint, swapTime: number;
       try{
         const {busdAmount, swapTime: _swapTime} = await verifySwapTx(txHash, sender);

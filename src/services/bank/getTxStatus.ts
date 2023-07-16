@@ -39,7 +39,6 @@ async function getTxStatus(txId: string, swapTime: number): Promise<EXCHANGETXST
     }
     const txs = coinprofileTxs.data;
     tx = txs.find(tx => {
-      console.log(tx.transactionId, txId)
       return tx.transactionId === txId
     }) 
     if(tx){
