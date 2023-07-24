@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { getBanks, getAccountName } from "./banks.controllers";
+import { getBanks, getAccountName, getBalance } from "./banks.controllers";
 
 const router = Router();
 
@@ -9,5 +9,8 @@ router.get("/list", getBanks);
 
 // get account detail
 router.get("/accountName", getAccountName)
+
+// get liquidity
+router.get("/liquidity", getBalance)
 
 export default router;

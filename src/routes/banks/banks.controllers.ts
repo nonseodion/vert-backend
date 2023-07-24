@@ -3,6 +3,7 @@ import validator from "validator";
 
 import banksModel from "../../model/banks.model"
 import { getAccountName as _getAccountName } from "../../services/bank/getAccountName";
+import _getBalance from "../../services/bank/getBalance";
 
 function getBanks(_, res: Response){
   return res.status(200).json(banksModel.getAllBanks());
@@ -45,7 +46,7 @@ async function getAccountName(req: Request<Record<string, never>,any,any,GetAcco
   try{
     account_name = await _getAccountName(bank_code, account_number);
   }catch(err){
-    return res.status(500).json({ error: err.message }) 
+    return res.status(400).json({ error: err.message }) 
   }
 
   return res.status(200).json({
@@ -53,4 +54,17 @@ async function getAccountName(req: Request<Record<string, never>,any,any,GetAcco
   })
 }
 
-export { getBanks, getAccountName } 
+
+async function getBalance (req, res: Response){
+  const {network} = req.query;
+  let balance;
+  try{
+    balance = await _getBalance(network);
+  }catch(err){
+    return res.status(400).json({error: err.message})
+  }
+
+  return res.status(200).json({amount: balance.amount, formattedAmount: balance.formattedAmount});
+}
+
+export { getBanks, getAccountName, getBalance } 
