@@ -30,6 +30,7 @@ function _txSocket(io: Server){
       const {error, valid} = validateTxSocketArgs(txHash, sender, bankCode, accountName, accountNumber, network);
 
       if(!valid){
+        console.log(`${socket.id}_argsValidityFailure:`, error);
         socket.emit(TransactionEvents.ARG_VALIDITY, error);
         return;
       }
@@ -50,7 +51,7 @@ function _txSocket(io: Server){
         socket.emit(TransactionEvents.SWAP_VALIDITY, false);
         return;
       }
-
+ 
       const sendNairaCallback = createSendNairaCallback({
         bankCode,
         accountName,

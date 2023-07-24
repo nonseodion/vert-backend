@@ -1,11 +1,6 @@
 import { createPublicClient, http } from "viem";
-import { localhost, bsc, bscTestnet } from "viem/chains";
+import { bsc, bscTestnet } from "viem/chains";
 
-
-const localhostClient = createPublicClient({
-  chain: localhost,
-  transport: http()
-});
 
 const bscClient = createPublicClient({
   chain: bsc,
@@ -23,8 +18,13 @@ export enum SupportedClient {
   LOCALHOST = "localhost"
 }
 
+export enum ChainIds {
+  bsc = 56,
+  bscTestnet = 97
+}
+
 const clients = {
-  bsc: bscClient, bscTestnet: bscTestnetClient, localhost: localhostClient
+  bsc: bscClient, bscTestnet: bscTestnetClient
 }
 
 function getClient(client: SupportedClient) {

@@ -45,6 +45,7 @@ export type BankAccount = {
 }
 
 export enum EXCHANGETXSTATUS {
+  PROCESSING = "processing",
   FULLFILED = "fullfiled",
   FAILED = "failed",
 }

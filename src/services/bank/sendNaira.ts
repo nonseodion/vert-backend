@@ -34,7 +34,13 @@ async function sendNaira(params: SendNairaParams){
   if(rateCorrect){
     rate = rates.data.rates.BUSDNGN.rate
   }else {
-    rate = (await getRates()).data.rates.BUSDNGN.rate;
+    try{
+      rate = (await getRates()).data.rates.BUSDNGN.rate;
+    }catch(err){
+      console.log("sendNaira__Failed: failed to fetch rates: ", err.message);
+      socket.emit(TransactionEvents.EXCHANGE_STATUS, EXCHANGETXSTATUS.FAILED);
+      return;
+    } 
   }
 
 
@@ -58,23 +64,22 @@ async function sendNaira(params: SendNairaParams){
     
     
     let active = false; // used to throttle fetch tx status
-    const maxRetries = 3;
-    let retries = 0;
 
     const interval = setInterval(async () => {
       if(active === true) return;
         active = true;
-        retries += 1;
 
         let status: EXCHANGETXSTATUS;
         try{
+          console.log("fetching txStatus", result.data.withdrawal.transactionId);
           status = await getTxStatus(
             result.data.withdrawal.transactionId, 
             network,
             swapTime
           );
+          console.log(result.data.withdrawal.transactionId, "txStatus:", status);
         }catch(err){
-
+          // nothing done because we need the exchange status
           console.log("sendNaira_Failed_getTxStatusError:", err.message)
         }
         
@@ -84,11 +89,6 @@ async function sendNaira(params: SendNairaParams){
           active = false;
           return;
         } 
-
-        if(retries === maxRetries){
-          clearInterval(interval);
-          socket.emit(TransactionEvents.EXCHANGE_STATUS, EXCHANGETXSTATUS.FAILED)
-        }
         active = false;
       }, 
       2500

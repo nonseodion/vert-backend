@@ -19,13 +19,16 @@ function _rateSocket(io: Server){
       }else{
         rateIntervalSet = true;
         latestRatesData = await getRates();
-        socket.emit("rates", latestRatesData)
+        socket.emit(RateEvents.RATES, latestRatesData)
       }
 
       setInterval(async () => {
-        latestRatesData = await getRates();
-        rateSocket.to("rates").emit("rates", latestRatesData)
-      }, 60000);
+        try{
+          latestRatesData = await getRates();
+        }catch(err){console.log("rateSocket_Failure: Interval Fetch failed", err)}
+        
+        rateSocket.to("rates").emit(RateEvents.RATES, latestRatesData)
+      }, 120000);
     } catch(err){
       console.log("rateSocket_Failure:", err.message);
     }
