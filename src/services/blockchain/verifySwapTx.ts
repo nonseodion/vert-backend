@@ -3,7 +3,7 @@ import { Address, TransactionReceipt, Hash, decodeEventLog, getAddress } from "v
 import receivers from "../../data/receivers.json";
 import routers from "../../data/routers.json";
 import routerAbi from "../../data/abis/router";
-import { SupportedClient, getClient } from "./config.blockchain";
+import { ChainIds, SupportedClient, getClient } from "./config.blockchain";
 
 const SellEventSignature = "0xa90e25af8f532db6a04ac99d7101fca78edb7b6c9507535d6e86146407204dcc";
 
@@ -20,7 +20,7 @@ async function verifySwapTx(txHash: Hash, senderAddress: Address, network: Suppo
     console.log(`checkBlockchainTx_Failure: ${txHash} sender is different. Original sender: ${from}. Wrong sender: ${senderAddress}`)
     throw Error("Failed to verify Swap Tx ");
   }
-  if(getAddress(to) !== getAddress(routers[0])){
+  if(getAddress(to) !== getAddress(routers[ChainIds[network]])){
     console.log(`checkBlockchainTx_Failure: ${txHash} sent to a wrong router: ${to}`)
     throw Error("Failed to verify Swap Tx ");
   }
@@ -28,7 +28,7 @@ async function verifySwapTx(txHash: Hash, senderAddress: Address, network: Suppo
   let sellEvent: {seller: Address, amountStableCoin: bigint, receiver: Address};
 
   for(const log of logs ){
-    if(log.address !== routers[0] && (log.topics?.[0] !== SellEventSignature)) continue;
+    if(log.address !== routers[ChainIds[network]] && (log.topics?.[0] !== SellEventSignature)) continue;
     const sellEventLog = decodeEventLog({
       data: log.data,
       abi: routerAbi,
@@ -49,8 +49,8 @@ async function verifySwapTx(txHash: Hash, senderAddress: Address, network: Suppo
     console.log(`checkBlockchainTx_Failure: Different Sell Log seller. SellEventSeller:${sellEvent.seller}. Sender:${senderAddress}`)
     throw Error("Failed to verify Swap Tx ");
   }
-  if(sellEvent.receiver !== getAddress(receivers[0])){
-    console.log(`checkBlockchainTx_Failure: Different Sell Log receiver. SellEventReceiver:${sellEvent.receiver}. Receiver:${receivers[0]}`);
+  if(sellEvent.receiver !== getAddress(receivers[ChainIds[network]])){
+    console.log(`checkBlockchainTx_Failure: Different Sell Log receiver. SellEventReceiver: ${sellEvent.receiver}. Receiver: ${receivers[ChainIds[network]]}`);
     throw Error("Failed to verify Swap Tx ");
   }
   
