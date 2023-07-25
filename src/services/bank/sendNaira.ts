@@ -4,14 +4,16 @@ import { BankAccount, EXCHANGETXSTATUS, getExchangeApi } from "./setup.bank";
 import banks from "../../data/banks.json";
 import { Socket } from "socket.io";
 import getRates, { Rates } from "./getRates";
-import { formatUnits } from "viem";
+import { Hash, formatUnits } from "viem";
 import toTwoDecimalPlaces from "../../utils/toTwoDecimalPlaces";
 import getTxStatus from "./getTxStatus";
 import { TransactionEvents } from "../../sockets/events";
 import { SupportedClient } from "../blockchain/config.blockchain";
+import { saveTxId } from "../../model/transactions.model";
 
 type SendNairaParams = {
-  bankAccount: BankAccount
+  bankAccount: BankAccount,
+  txHash: Hash
   rates: Rates,
   busdAmount: bigint,
   socket: Socket,
@@ -20,7 +22,7 @@ type SendNairaParams = {
 }
 
 async function sendNaira(params: SendNairaParams){
-  const { bankAccount, rates, socket, busdAmount, swapTime, network } = params;
+  const { bankAccount, rates, socket, busdAmount, swapTime, network, txHash } = params;
   const {bankCode, name: accountName, number: accountNumber} = bankAccount;
   const bankName = banks.find((bank) => bank.code === bankCode).name;
   const exchangeApi = getExchangeApi(network);
@@ -44,7 +46,11 @@ async function sendNaira(params: SendNairaParams){
   }
 
 
-  const NGNAmount = toTwoDecimalPlaces(formatUnits(busdAmount * BigInt(rate*100), 20));
+  const NGNAmount = toTwoDecimalPlaces(
+    String(Math.ceil(
+      +formatUnits(busdAmount * BigInt(rate*100), 20)
+    ))
+  );
 
   // divide by 10**18
   // TODO validate amount, amount must be >= 500
@@ -58,7 +64,7 @@ async function sendNaira(params: SendNairaParams){
         accountName,
         bank: bankName,
         bankCode,
-        amount: "500" // NGNAmount
+        amount: NGNAmount
       }
     )).data;
     
@@ -78,6 +84,9 @@ async function sendNaira(params: SendNairaParams){
             swapTime
           );
           console.log(result.data.withdrawal.transactionId, "txStatus:", status);
+          if(status === EXCHANGETXSTATUS.FULLFILED){
+            await saveTxId( txHash, `${process.env.EXCHANGE}-${result.data.withdrawal.transactionId}`);
+          }
         }catch(err){
           // nothing done because we need the exchange status
           console.log("sendNaira_Failed_getTxStatusError:", err.message)

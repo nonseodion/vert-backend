@@ -3,6 +3,7 @@ import express from "express";
 import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
+import mongoose from "mongoose";
 import "./utils/setupEnv"
 
 import banksRouter from "./routes/banks/banks.routes";
@@ -28,6 +29,14 @@ app.get("/", (_, res) => {
 const httpServer = createServer(app);
 setupSocket(httpServer);
 
-httpServer.listen(PORT, () => {
-  console.log("Listening on port: ", PORT)
-})
+// setup mongoose and http server
+mongoose.connect(process.env.MONGO_URL)
+  .then(() => {
+    console.log("Connected to Mongodb")
+    httpServer.listen(PORT, () => {
+      console.log("Listening on port:", PORT)
+    });
+  })
+  .catch(err => {
+    console.log(err.message);
+  })

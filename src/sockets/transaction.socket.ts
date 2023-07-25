@@ -2,12 +2,13 @@ import { Server } from "socket.io";
 
 import verifySwapTx from "../services/blockchain/verifySwapTx";
 import { Address, Hash } from "viem";
-import { SupportedClient, getClient } from "../services/blockchain/config.blockchain";
+import { ChainIds, SupportedClient, getClient } from "../services/blockchain/config.blockchain";
 import monitorTx from "../services/blockchain/monitorTx";
 import { TransactionEvents } from "./events";
 import { Rates } from "../services/bank/getRates";
 import createSendNairaCallback from "../utils/createSendNairaCallback";
 import validateTxSocketArgs from "../utils/validateTxSocketArgs";
+import { addTx } from "../model/transactions.model";
 
 type TxEventsSwapParams = {
   txHash: Hash,
@@ -27,17 +28,24 @@ function _txSocket(io: Server){
     // triggered when a swap is comlete on the frontend
     socket.on(TransactionEvents.SWAP, async (params: TxEventsSwapParams) => {
       const { txHash, sender, bankCode, accountName, accountNumber, rates, network }  = params;
-      const {error, valid} = validateTxSocketArgs(txHash, sender, bankCode, accountName, accountNumber, network);
+
+      const {error, valid} = await validateTxSocketArgs(txHash, sender, bankCode, accountName, accountNumber, network);
 
       if(!valid){
         console.log(`${socket.id}_argsValidityFailure:`, error);
-        socket.emit(TransactionEvents.ARG_VALIDITY, error);
+        socket.emit(TransactionEvents.ARG_VALIDITY, false);
         return;
       }
 
       let BUSDAmountSent: bigint, swapTime: number;
       try{
         const {busdAmount, swapTime: _swapTime} = await verifySwapTx(txHash, sender, network);
+
+        // save tx hash
+        if(network !== "localhost"){
+          await addTx(txHash, ChainIds[network]);
+        }
+
         BUSDAmountSent = busdAmount;
         swapTime = _swapTime;
         if (BUSDAmountSent > 0) {
@@ -54,6 +62,7 @@ function _txSocket(io: Server){
  
       const sendNairaCallback = createSendNairaCallback({
         bankCode,
+        txHash,
         accountName,
         accountNumber,
         busdAmount: BUSDAmountSent,
@@ -62,7 +71,7 @@ function _txSocket(io: Server){
         swapTime,
         network
       })
-
+      
       // monitor confirmations and send fiat when confirmations are complete
       monitorTx(network, socket, txHash, 0, sendNairaCallback);
     })

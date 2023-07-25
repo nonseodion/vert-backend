@@ -1,10 +1,10 @@
 import validator from "validator";
 import { Hash, Address } from "viem";
-import { Rates } from "../services/bank/getRates";
 import { validateAccountNumber, validateBankCode } from "./validateBankDetails";
-import { SupportedClient } from "../services/blockchain/config.blockchain";
+import { ChainIds, SupportedClient } from "../services/blockchain/config.blockchain";
+import {txExists} from "../model/transactions.model";
 
-function validateTxSocketArgs(
+async function validateTxSocketArgs(
   txHash: Hash, sender: Address, bankCode: string, accountName: string, accountNumber: string, network: SupportedClient
 ){
   if(!validator.isHexadecimal(txHash)){
@@ -13,6 +13,13 @@ function validateTxSocketArgs(
       valid: false
     }
   }
+  if(await txExists(txHash, ChainIds[network])){
+    return {
+      error: `Tx already processed. Hash: ${txHash}`,
+      valid: false
+    }
+  }
+
   if(!validator.isHexadecimal(sender)){
     return {
       error: "Invalid sender",
