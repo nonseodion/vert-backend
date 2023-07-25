@@ -18,7 +18,7 @@ async function getBalance(network: SupportedClient) {
         currency: "NGN",
       }
     })).data.data.balance;
-    console.log(balance)
+    
     return balance;
   }catch(err){
     console.log("getBalance_FAILED:", err.response.data);

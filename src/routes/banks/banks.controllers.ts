@@ -64,7 +64,10 @@ async function getBalance (req, res: Response){
     return res.status(400).json({error: err.message})
   }
 
-  return res.status(200).json({amount: balance.amount, formattedAmount: balance.formattedAmount});
+  return res.status(200).json({
+    amount: balance.amount > 550 ? 550 : 0, 
+    formattedAmount: balance.formattedAmount > 55000 ? 55000 : 0, 
+  });
 }
 
 export { getBanks, getAccountName, getBalance } 

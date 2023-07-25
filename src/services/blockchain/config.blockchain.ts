@@ -27,7 +27,7 @@ const clients = {
   bsc: bscClient, bscTestnet: bscTestnetClient
 }
 
-function getClient(client: SupportedClient) {
+function getClient<K extends "bsc" | "bscTestnet">(client: SupportedClient): typeof clients[K] {
   return clients[client];
 } 
 

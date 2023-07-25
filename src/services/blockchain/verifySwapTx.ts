@@ -24,6 +24,10 @@ async function verifySwapTx(txHash: Hash, senderAddress: Address, network: Suppo
     console.log(`checkBlockchainTx_Failure: ${txHash} sent to a wrong router: ${to}`)
     throw Error("Failed to verify Swap Tx ");
   }
+  if(Number(blockNumber) + 50 < await blockchainClient.getBlockNumber()){
+    console.log(`checkBlockchainTx_Failure: ${txHash} too old.`);
+    throw Error("Failed to verify Swap Tx ");
+  }
   
   let sellEvent: {seller: Address, amountStableCoin: bigint, receiver: Address};
 
