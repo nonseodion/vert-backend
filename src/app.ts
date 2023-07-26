@@ -16,7 +16,7 @@ app.use(morgan("tiny"));
 app.use(helmet());
 app.use(cors());
 
-const PORT = 3001;
+const PORT = 8000;
 
 app.use("/banks", banksRouter);
 
