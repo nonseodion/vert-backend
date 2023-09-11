@@ -1,7 +1,7 @@
 import { SupportedClient } from "../blockchain/config.blockchain";
 import { getExchangeApi } from "./setup.bank";
 
-type CoinprofileBalance = {
+type ExchangeBalance = {
   totalRecieved: number,
   totalSent: number,
   txnCount: number,
@@ -13,7 +13,7 @@ type CoinprofileBalance = {
 async function getBalance(network: SupportedClient) {
   const exchangeApi = getExchangeApi(network);
   try{
-    const balance: CoinprofileBalance = (await exchangeApi.get("balance", {
+    const balance: ExchangeBalance = (await exchangeApi.get("balance", {
       params: {
         currency: "NGN",
       }

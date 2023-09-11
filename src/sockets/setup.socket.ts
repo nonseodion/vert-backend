@@ -6,7 +6,7 @@ import rateSocket from "./rate.socket";
 function setupSocket(httpServer: HttpServer){
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.NODE_ENV === "production" ? false : "http://localhost:3000" 
+      origin: process.env.NODE_ENV === "production" ? "*" : "http://localhost:3000" 
     }
   });
   

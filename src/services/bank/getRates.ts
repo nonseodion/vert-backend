@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { coinprofileSDKNoAuth } from "./setup.bank";
+import { exchangeSDKNoAuth } from "./setup.bank";
 
 export type Rates = {
   data: {
@@ -17,7 +17,7 @@ async function getRates(){
 
   try{
     const data = (
-      await coinprofileSDKNoAuth.getCurrentRates()
+      await exchangeSDKNoAuth.getCurrentRates()
     ).data.data;
 
     rates = {

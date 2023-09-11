@@ -1,13 +1,13 @@
 import { SupportedClient } from "../blockchain/config.blockchain";
 import { EXCHANGETXSTATUS, getExchangeApi } from "./setup.bank";
 
-type CoinprofileTx = {
+type ExchangeTx = {
   transactionId: string,
   status: EXCHANGETXSTATUS
 }
 
-type CoinprofileTxs = {
-  data: CoinprofileTx[],
+type ExchangeTxs = {
+  data: ExchangeTx[],
   total: number,
   perPage: number,
   page: string,
@@ -17,13 +17,13 @@ type CoinprofileTxs = {
 
 async function getTxStatus(txId: string, network: SupportedClient, swapTime: number): Promise<EXCHANGETXSTATUS>{
   let pages = 1;
-  let tx: CoinprofileTx;
+  let tx: ExchangeTx;
   const exchangeApi = getExchangeApi(network);
 
   for(let i = 0; i < pages; i++){
-    let coinprofileTxs: CoinprofileTxs;
+    let exchangeTxs: ExchangeTxs;
     try{
-      coinprofileTxs = (await exchangeApi.get("transaction", {
+      exchangeTxs = (await exchangeApi.get("transaction", {
         params: {
           currency: 'NGN',
           page: i + 1,
@@ -37,9 +37,9 @@ async function getTxStatus(txId: string, network: SupportedClient, swapTime: num
     }
 
     if(i === 0){
-      pages = coinprofileTxs.pages;
+      pages = exchangeTxs.pages;
     }
-    const txs = coinprofileTxs.data;
+    const txs = exchangeTxs.data;
     tx = txs.find(tx => {
       return tx.transactionId === txId
     }) 
