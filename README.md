@@ -37,7 +37,7 @@ The REST API is done using Expressjs.
 | GET /liquidity   |             -             | Returns the amount of money available as liquidity on the exchange. The liquidity is VertFinance deposit held on the exchange. |
 
 ### Websocket API
-This API was created with socket.io . It sends mon
+This API was created with socket.io . 
 
 | Endpoint      | Events                                                                                 | Description                                                              |
 |---------------|----------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
