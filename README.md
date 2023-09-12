@@ -28,7 +28,7 @@ The bank service provides methods for getting account name, exchange balance, fi
 
 ### REST API
 
-The REST API is done using Expressjs.
+The REST API is done using Expressjs. It is in the [routes folder](./src/routes)
 
 | Endpoint         | Parameters                | Description                                                                                                                   |
 |------------------|---------------------------|-------------------------------------------------------------------------------------------------------------------------------|
@@ -37,7 +37,7 @@ The REST API is done using Expressjs.
 | GET /liquidity   |             -             | Returns the amount of money available as liquidity on the exchange. The liquidity is VertFinance deposit held on the exchange. |
 
 ### Websocket API
-This API was created with socket.io . 
+This API was created with socket.io . It is in the [sockets folder](./src/sockets)
 
 | Endpoint      | Events                                                                                 | Description                                                              |
 |---------------|----------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
