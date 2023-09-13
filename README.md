@@ -53,7 +53,7 @@ Used to interact with a JSON file that stores details about supported banks. It 
 
 Used to interact with a mongodb database that stores details about transactions completed on the backend. The transactions 
 
-### Transaction Flow
+## Transaction Flow
 
 1. The swap event on the transactions endpoint of the Websocket is used to send the blockchain transaction hash, signed rate and bank details to the backend. This initiates the transaction on the backend.
 
@@ -66,3 +66,12 @@ Used to interact with a mongodb database that stores details about transactions 
 5. When the transaction completes, it is recorded in the database. 
 
 At each stage of processing the transaction, the transaction Websocket connection informs the frontend. This enables the frontend to deliver a good user experience.
+
+
+## How to Setup Locally
+
+1. Clone this github repository with `git clone https://github.com/nonseodion/vert-backend.git`.
+2. Change the current directory of the terminal to vert-backend directory with `cd vert-backend`.
+3. Make sure you have yarn installed and then install all the dependencies with `npm install`.
+4. Create a `.env` file and use the `.env.example` file in this repository to fill the .env file with the environment variables. The `.env.example` has comments to explain each environment variable.
+5. Startup the server with `npm run start`.
