@@ -18,7 +18,7 @@ Vert Finance already has fiat liquidity on the exchange to enable fiat transacti
 
 ## Structure
 
-The backend is built using Expressjs, Typescript, and Viem. Its structure consists of services for interacting with external services, REST APIs for frontend to fetch data, Websockets to improve user experience by providing a bi-directional communciation channel between frontend and backend and models for interacting with databases.
+The backend is built using [Expressjs](https://nodejs.org/en), [Typescript](https://www.typescriptlang.org/), and [Viem](https://viem.sh/). Its structure consists of services for interacting with external services, REST APIs for frontend to fetch data, Websockets to improve user experience by providing a bi-directional communciation channel between frontend and backend and models for interacting with databases.
 
 ### Services
 
@@ -67,7 +67,7 @@ Used to interact with a MongoDb database that stores details about transactions 
 
 5. When the transaction completes, it is recorded in the database. 
 
-At each stage of processing the transaction, the transaction Websocket connection informs the frontend. This enables the frontend to deliver a good user experience.
+At each stage of processing the transaction, the transaction Websocket connection informs the frontend. This enables the frontend to deliver an excellent user experience.
 
 
 ## How to Setup Locally
