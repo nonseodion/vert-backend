@@ -2,7 +2,7 @@
 
 ## Welcome
 
-Hi thanks for taking a look at the Vert Finance Backend. Vert Finance is a web-based decentralized application that lets you convert almost any cryptocurrency to fiat in your bank account. It's currently built to support only cryptocurrency to the Nigerian Naira conversions. Check out this piece to find out more about Vert Finance.
+Hi, thanks for taking a look at the Vert Finance Backend. Vert Finance is a web-based decentralized application that lets you convert almost any cryptocurrency to fiat in your bank account. It's currently built to support only cryptocurrency to the Nigerian Naira conversions. Check out [this piece](https://nonseodion.medium.com/architecture-of-a-fiat-to-cryptocurrency-exchange-c65a6c233a2c) to find out more about Vert Finance.
 
 This is the Backend Repo. You can also have a look at the [frontend](https://github.com/nonseodion/vert-ui) and [smartcontract](https://github.com/nonseodion/vert-router) repos.
 
