@@ -4,7 +4,7 @@ import { bsc, bscTestnet } from "viem/chains";
 
 const bscClient = createPublicClient({
   chain: bsc,
-  transport: http()
+  transport: http('https://bnb.rpc.subquery.network/public')
 });
 
 const bscTestnetClient = createPublicClient({
